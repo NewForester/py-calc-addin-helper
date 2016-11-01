@@ -25,12 +25,12 @@ The _doobiedoo_ example, adapted for use with _capp.py_, is provided as an examp
 
 To package the example, try:
 
-   liboaddon package doobiedoo python3/doobiedoo
+    liboaddon package DoobieDoo python3/doobiedoo.py
 
 The result should be a directory _doobiedoo_, which may be deleted, and the package _doobiedoo.oxt_.
 The package may be installed with:
 
-   liboaddon install doobiedoo.oxt
+    liboaddon install DoobieDoo.oxt
 
 ---
 
@@ -39,20 +39,21 @@ These are to be documented.
 
 ---
 
-The _liboaddon_ script has only ever been used with LibreOffice versions installed using
-Open Document Foundation deb packages.
-Generation of the add-on package requires the LibreOffice SDK be installed.
+The _liboaddon_ script was written for, and has only ever been used under, Linux.
+The original _doobiedoo_ example contained instructions for package construction by hand under Windows.
 
-The _liboaddon_ script has only ever been used under Linux.
+The script has only ever been used with LibreOffice versions installed using Open Document Foundation _deb_ packages
+and the generation of add-on packages requires the LibreOffice SDK be installed.
+Pathnames may need to be altered for other platforms.
 
-It will select the correction version of _capp.py_ based on the version of LibreOffice installed
-but it is presently unclear how it selects the correct version of Python.
+The script selects the appropriate version of _capp.py_ based on the installed version of LibreOffice.
+It uses the version of Python shipped with LibreOffice.
 
 The reliance on symbolic links is to be removed.
 
 ---
 
-Copyright NewForester, 2012, 2016
+Copyright (C) 2012, 2016, NewForester, released under the terms of the GNU GPL v2
 
 except _doobiedoo.py_ Copyright jan@biochemfusion.com, 2009
 
@@ -61,4 +62,4 @@ except _doobiedoo.py_ Copyright jan@biochemfusion.com, 2009
 Repository contents are provided as-is.
 Validation is in progress.
 
-    NewForester, October 2016.
+    NewForester, Novemeber 2016.

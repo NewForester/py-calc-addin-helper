@@ -19,12 +19,14 @@
 ##            the result is <module>.oxt and a subdirectory named <module>
 ##            the subdirectory may safely be deleted
 ##
-#.  Credit: Inspired by the DoobieDoo example for Windows
-#.          Created by jan@biochemfusion.com, April 2009
-#.
-#.  Caveat: The package verb of this bash script relies on a python script
-#.          named capp.py, which must have been deployed correctly.
-#.
+#   Caveat: The package verb of this bash script relies on a python script
+#           named capp.py, which must have been deployed correctly.
+#
+#   Copyright (C) 2012, 2016, NewForester
+#   Released under the terms of the GNU GPL v2
+#
+#   Inspired by the DoobieDoo example for Windows
+#   Created by jan@biochemfusion.com, April 2009
 
 # print out header comment
 
@@ -33,6 +35,7 @@ usage() { (sed -e "/^###/d" -e "/^##/!d" $0 && echo -e "\e[35m${0##*/}: \e[31m$@
 # process options
 
 liboroot="/usr/lib/libreoffice";
+
 unopkg="${liboroot}/program/unopkg";
 
 while [[ -n "${1%%[!-]*}" ]]; do
@@ -73,6 +76,7 @@ case "$*" in
     fi
 
     idlc="${liboroot}/sdk/bin/idlc";
+    python="${liboroot}/program/python";
 
     if [[ ! -x "${idlc}" ]]; then
         usage "suspect the SDK has not been installed";
@@ -95,12 +99,12 @@ case "$*" in
     pFile=${pFile##*/};
 
     cd ${pName} > /dev/null;
-    ${cabin}/idlGenerate ${pName} ${pFile} > ${xName}.idl;
+    ${python} ${cabin}/idlGenerate ${pName} ${pFile} > ${xName}.idl;
     ${idlc} -w -I ${liboroot}/sdk/idl ${xName}.idl;
     ${regmerge} ${xName}.rdb /UCR ${xName}.urd;
 
-    ${cabin}/xcuGenerate ${pName} ${pFile} > ${pName}.xcu;
-    ${cabin}/xmlGenerate ${pName} ${pFile} > description.xml;
+    ${python} ${cabin}/xcuGenerate ${pName} ${pFile} > ${pName}.xcu;
+    ${python} ${cabin}/xmlGenerate ${pName} ${pFile} > description.xml;
     xmlManifest ${xName}.rdb ${pFile} ${pName}.xcu > META-INF/manifest.xml;
 
 #    7z a -r -x'!'${xName}.urd -x'!'${xName}.idl -tzip ../${pName}.oxt *;
