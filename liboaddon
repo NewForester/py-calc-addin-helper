@@ -13,13 +13,13 @@
 ##          full    list more information about installed addons
 ##          remove  remove an installed addon by identifier
 ##
-##          package create an oxt file starting from python source
+##          package create an oxt file starting from Python source:
 ##            <module> is the name of the Python class to be packaged
 ##            <source.py> is that path of the Python class's implementation
 ##            the result is <module>.oxt and a subdirectory named <module>
 ##            the subdirectory may safely be deleted
 ##
-#   Caveat: The package verb of this bash script relies on a python script
+#   Caveat: The package verb of this bash script relies on a Python script
 #           named capp.py, which must have been deployed correctly.
 #
 #   Copyright (C) 2012, 2016, NewForester
@@ -86,11 +86,11 @@ case "$*" in
     if [[ -d "${liboroot}/ure/bin" ]]; then
         # Old LibreOffice 3.x
         regmerge="${liboroot}/ure/bin/regmerge";
-        cabin="${PWD}/python2";
+        script="${PWD}/python2/capp.py";
     else
         # New LibreOffice 5.x
         regmerge="${liboroot}/program/regmerge";
-        cabin="${PWD}/python3";
+        script="${PWD}/python3/capp.py";
     fi
 
     rm -fr ${pName} ${pName}.oxt;
@@ -99,12 +99,12 @@ case "$*" in
     pFile=${pFile##*/};
 
     cd ${pName} > /dev/null;
-    ${python} ${cabin}/idlGenerate ${pName} ${pFile} > ${xName}.idl;
+    ${python} ${script} idl ${pName} ${pFile} > ${xName}.idl;
     ${idlc} -w -I ${liboroot}/sdk/idl ${xName}.idl;
     ${regmerge} ${xName}.rdb /UCR ${xName}.urd;
 
-    ${python} ${cabin}/xcuGenerate ${pName} ${pFile} > ${pName}.xcu;
-    ${python} ${cabin}/xmlGenerate ${pName} ${pFile} > description.xml;
+    ${python} ${script} xcu ${pName} ${pFile} > ${pName}.xcu;
+    ${python} ${script} xml ${pName} ${pFile} > description.xml;
     xmlManifest ${xName}.rdb ${pFile} ${pName}.xcu > META-INF/manifest.xml;
 
 #    7z a -r -x'!'${xName}.urd -x'!'${xName}.idl -tzip ../${pName}.oxt *;

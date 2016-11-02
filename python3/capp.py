@@ -1,49 +1,25 @@
-#!/usr/bin/python
-
 '''
-Calc Add-In Proprocessor
+Calc Add-In Preprocessor for Python 3.x.x
 
-This script preprocesses a Python module intended as a Calc add-in generating:
-  - the xml description of the add-in component
-  - the xcu description of the add-in's configuration
-  - the idl description of the add-in's interface
+This Python script can be used to pre-processes the Python source file of
+a LibreOffice calc add-in to generate files needed to package the add-in.
 
-A Calc add-in is created from several source files that need to be mutually
-consistent:  change one and the others needs to be checked and updated.
-
-This script implements the DRY principle by considering the Python source file
-as the one and only source and generating the other source files from it.
-
-Most, but not all, the information used to generate the description files
-appears as comments in the Python source.  The generation is not too clever
-but it is not unnecessarily dumb either.  For an idea of how the Python looks,
-best see an example such as the doobiedoo.py adapted from earlier work by
-jan@biochemfusion.com.
-
-Invocation is sneaky and the use of symbolic link is preferred:
-   idlGenerate -> capp.py
-   xcuGenerate -> capp.py
-   xmlGenerate -> capp.py
-
-There are two parameters:
+The script takes three arguments:
+    generate   - what to generate, one of idl, xcu or xml
     moduleName - the name of the add-in module
     sourceFile - the path of the add-in's Python source files
-
 Output is to standard output.
 
-Diagnostics are virtually non-existent:  if the Python source does not have
-the correct form, then the output, if there is any at all, will be incomplete.
+Most, but not all, the information used to generate the description files
+appears as comments in the Python source file.  If the information is missing
+or not in the form expected by the script, the output will be incomplete.
 
-Two parameters leaves just a little wriggle room for later.  Today it might be
-possible to deduce the module's name from the source file's or from the content
-of the source file but tomorrow it may be necessary to process just the one
-class definition from a source file containing several.
+For more information see the module documentation in capp-help.py.
+'''
 
-The DoobieDoo example by jan@biochemfusion.com, April 2009 was taken as a
-starting point since LibreOffice / OpenOffice documentation was not helpful.
-In particular, the dependency on OpenOffice.org 2.4 is taken as correct.  This
-is probably the version that introduced the xcu mechanism and rendered other
-examples of how implement Calc add-ins obsolescent.
+'''
+    Copyright (C) 2012, 2016, NewForester
+    Released under the terms of the GNU GPL v2
 '''
 
 import sys, re
@@ -58,19 +34,19 @@ _reMethodDef  = re.compile(r'^\s+def\s+(\S*)\s*\(\s*self\s*,([^)]+)\)\s*:')
 _reTripleQ    = re.compile(r'^\s*"""\s*$')
 _reTripleA    = re.compile(r"^\s*'''\s*$")
 
-'''
-Functional programming aid
-'''
 def strip(item):
+    '''
+    functional programming aid
+    '''
     return item.strip()
 
-def processInput(sourceFile,moduleName,iam):
+def processInput(sourceFile,moduleName,generate):
     '''
     process the input a line at a time, generating output when convenient
 
     Regular expressions trigger state changes as input lines of significance are recognised.
     Certain state changes trigger the generation of output.
-    What is generated is determined by the iam parameter.
+    What is generated is determined by the generate parameter.
     '''
     interfaceName = 'X' + moduleName
     moduleVersion = "1.00"
@@ -117,9 +93,9 @@ def processInput(sourceFile,moduleName,iam):
             if result:
                 if interfaceName == result.group(2):
                     if moduleName == result.group(1):
-                        if iam == "idlGenerate":
+                        if generate == "idl":
                             idlGeneratePreamble(unoModuleId,interfaceName)
-                        if iam == "xcuGenerate":
+                        if generate == "xcu":
                             xcuGeneratePreamble(unoComponentId)
                         state = "Class Implementation"
         elif state == "Class Implementation" or state == "Method Implementation":
@@ -140,9 +116,9 @@ def processInput(sourceFile,moduleName,iam):
             state = "Parameter Descriptions"
         elif state == "Parameter Descriptions":
             if _reTripleQ.match(line) or _reTripleA.match(line):
-                if iam == "idlGenerate":
+                if generate == "idl":
                     idlGenerateSignature(idlSignature)
-                if iam == "xcuGenerate":
+                if generate == "xcu":
                     xcuGenerateNode(moduleName,methodName,methodDescription,parameterNames,parameterDescriptions)
                 state = "Method Implementation"
             elif line.find(':') != -1:
@@ -155,11 +131,11 @@ def processInput(sourceFile,moduleName,iam):
                     parameterDescriptions[work[0]] = work[1]
 
     if state != "Seeking":
-        if iam == "xmlGenerate":
+        if generate == "xml":
             xmlGenerateDescription(unoModuleId,moduleVersion,displayName,publisherLink,publisherName)
-        if iam == "idlGenerate":
+        if generate == "idl":
             idlGeneratePostamble(unoModuleId)
-        if iam == "xcuGenerate":
+        if generate == "xcu":
             xcuGeneratePostamble()
 
     return sourceFile
@@ -263,30 +239,28 @@ def xcuGenerateNode(moduleName,methodName,methodDescription,parameterNames,param
     print ('          </node>')
     print ('        </node>')
 
-'''
-Open the python source file - complain a little if that does not work
-'''
-try:
-    moduleName = sys.argv[1]
-    sourceFile = open(sys.argv[2],"r")
-except:
-    print ("I need a python module to process - the module name and the path to the module's implementation")
-    sys.exit(1)
 
-'''
-Do the clever bit using the script's name-of-invocation to determine it's function - don't do this again
-'''
-iam = sys.argv[0];
-ii = iam.rfind('/')
-if ii != -1:
-    iam = iam[ii+1:]
-ii = iam.rfind('.')
-if ii != -1:
-    iam = iam[:ii]
+if sys.argv[0].find('pydoc') ==  -1:
+    '''
+    Recognise the first argument
+    '''
 
-'''
-Do as it says ...
-'''
-processInput(sourceFile,moduleName,iam).close()
+    if not sys.argv[1] in ['idl', 'xcu', 'xml']:
+        print ("I need to know what to generate - my first argument must be one of ['idl', 'xcu', 'xml']")
+        sys.exit(1)
+
+    '''
+    Open the python source file
+    '''
+    try:
+        sourceFile = open(sys.argv[3],"r")
+    except:
+        print ("I need a python module to process - the module name and the path to the module's implementation")
+        sys.exit(1)
+
+    '''
+    Preprocess the python source file ...
+    '''
+    processInput(sourceFile,sys.argv[2],sys.argv[1]).close()
 
 # EOF
