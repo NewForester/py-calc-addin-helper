@@ -1,26 +1,29 @@
 #!/bin/bash --posix
 
 ##
-##  Goal:   Ease the creation, installation etc. of LibreOffice addons and calc addins
+##  Goal:   Ease the creation, installation etc. of LibreOffice add-ons
+##          and the packaging of LibreOffice calc add-ins written in Python
 ##
 ##  Use:    liboaddon install <oxt>
 ##          liboaddon list [full]
 ##          liboaddon remove [identifier]
 ##          liboaddon package <module> <source.py>
 ##
-##  where   install installs the addon packaged in the given oxt file pathname
-##          list    list identifiers of installed addons
-##          full    list more information about installed addons
-##          remove  remove an installed addon by identifier
+##  where   install installs the add-on package given by the <oxt> pathname
+##          list    lists names of installed add-ons
+##          full    lists more information about installed add-ons
+##          remove  removes an installed add-on by name
 ##
-##          package create an oxt file starting from Python source:
+##          package creates an oxt add-on package starting from the Python
+##          source of one or more calc add-in functions
 ##            <module> is the name of the Python class to be packaged
-##            <source.py> is that path of the Python class's implementation
+##            <source.py> is that path of the Python source
 ##            the result is <module>.oxt and a subdirectory named <module>
 ##            the subdirectory may safely be deleted
 ##
-#   Caveat: The package verb of this bash script relies on a Python script
-#           named capp.py, which must have been deployed correctly.
+
+#   Caveat: The package action relies on a Python script named capp.py,
+#           which must have been deployed correctly.
 #
 #   Copyright (C) 2012, 2016, NewForester
 #   Released under the terms of the GNU GPL v2
